@@ -1,8 +1,10 @@
-from port_scan import port_scan
+from port_scan import PortScanner
 
 
 def main():
-    port_scan('scanme.nmap.org')
+    scanner = PortScanner('scanme.nmap.org')
+    scanner.scan_ports()
+
 
 if __name__ == '__main__':
     main()
