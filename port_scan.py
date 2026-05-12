@@ -1,10 +1,14 @@
+import asyncio
 import socket
 
+
+
 class PortScanner:
-    def __init__(self, hostname):
+    def __init__(self, hostname, max_port = 1024, semaphore = 500):
         self.hostname = hostname
         self.ip = self.establish_connection(hostname)
-
+        self.port_range = range(1, max_port+1)
+        self.semaphore = asyncio.Semaphore(semaphore)
 
 
     def establish_connection(self, hostname):
@@ -16,13 +20,40 @@ class PortScanner:
             raise ConnectionError(f"Socket Error Occurred: {e}")
 
 
-    def scan_ports(self, start_port = 1, end_port = 1024):
-        for i in range(start_port, end_port):
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.settimeout(0.1)
-                result = s.connect_ex((self.ip, i))
-                if result == 0:
-                    print('port '+ str(i) + ' is open')
-        return 'Scan complete'
+    async def connect_socket(self, port):
+
+        async with self.semaphore:
+            try:
+                async with asyncio.timeout(.3):
+                    reader, writer = await asyncio.open_connection(self.hostname, port)
+                    writer.close()
+                    await writer.wait_closed()
+                    return "open"
+            except asyncio.TimeoutError as e:
+                return "closed"
+            except OSError as e:
+                return "closed"
+            except ConnectionRefusedError as e:
+                return "closed"
+            except Exception as e:
+                return "closed"
+
+
+
+    async def scan_ports(self):
+
+        tasks = []
+        async with asyncio.TaskGroup() as tg:
+            for i in self.port_range:
+                port_status = tg.create_task(self.connect_socket(i))
+                tasks.append(port_status)
+
+
+        for i in range(0, len(tasks)):
+            if tasks[i].result() != "closed":
+                print(f'port {str(i - 1)} is {tasks[i].result()}')
+
+
+
 
 
