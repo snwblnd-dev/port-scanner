@@ -19,12 +19,24 @@ class PortScanner:
         except socket.error as e:
             raise ConnectionError(f"Socket Error Occurred: {e}")
 
-    async def connect_socket(self, port):
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.setblocking(False)
-            s.settimeout(.1)
-            return s.connect_ex((self.hostname, port))
 
+    async def connect_socket(self, port):
+
+        async with self.semaphore:
+            try:
+                async with asyncio.timeout(.3):
+                    reader, writer = await asyncio.open_connection(self.hostname, port)
+                    writer.close()
+                    await writer.wait_closed()
+                    return "open"
+            except asyncio.TimeoutError as e:
+                return "closed"
+            except OSError as e:
+                return "closed"
+            except ConnectionRefusedError as e:
+                return "closed"
+            except Exception as e:
+                return "closed"
 
 
 
@@ -37,8 +49,9 @@ class PortScanner:
                 tasks.append(port_status)
 
 
-        for task in tasks:
-            print(task)
+        for i in range(0, len(tasks)):
+            if tasks[i].result() != "closed":
+                print(f'port {str(i - 1)} is {tasks[i].result()}')
 
 
 
