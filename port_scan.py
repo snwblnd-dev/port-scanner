@@ -29,12 +29,6 @@ class PortScanner:
                     writer.close()
                     await writer.wait_closed()
                     return "open"
-            except asyncio.TimeoutError as e:
-                return "closed"
-            except OSError as e:
-                return "closed"
-            except ConnectionRefusedError as e:
-                return "closed"
             except Exception as e:
                 return "closed"
 
@@ -51,7 +45,7 @@ class PortScanner:
 
         for i in range(0, len(tasks)):
             if tasks[i].result() != "closed":
-                print(f'port {str(i - 1)} is {tasks[i].result()}')
+                print(f'port {str(i + 1)} is {tasks[i].result()}')
 
 
 
