@@ -1,6 +1,6 @@
 import asyncio
 import socket
-
+import json
 
 
 class PortScanner:
@@ -42,10 +42,17 @@ class PortScanner:
                 port_status = tg.create_task(self.connect_socket(i))
                 tasks.append(port_status)
 
+        # for i in range(0, len(tasks)):
+        #     if tasks[i].result() != "closed":
+        #         print(f'port {str(i + 1)} is {tasks[i].result()}')
 
+        results = {}
         for i in range(0, len(tasks)):
-            if tasks[i].result() != "closed":
-                print(f'port {str(i + 1)} is {tasks[i].result()}')
+            results.update({i : tasks[i].result()})
+        return json.dumps(results)
+
+
+
 
 
 

@@ -6,9 +6,6 @@ from port_scanner.port_scan import PortScanner
 
 app = FastAPI()
 def main():
-
-
-
     parser = create_parser()
     args = parser.parse_args()
 
