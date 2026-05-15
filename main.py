@@ -1,11 +1,14 @@
-import argparse
+from fastapi import FastAPI
 import asyncio
 
-from parser import create_parser
-from port_scan import PortScanner
+from port_scanner.parser import create_parser
+from port_scanner.port_scan import PortScanner
 
-
+app = FastAPI()
 def main():
+
+
+
     parser = create_parser()
     args = parser.parse_args()
 
