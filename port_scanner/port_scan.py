@@ -2,6 +2,8 @@ import asyncio
 import socket
 import json
 
+from pydantic import BaseModel
+
 
 class PortScanner:
     def __init__(self, hostname, max_port = 1024, semaphore = 500):
@@ -48,8 +50,9 @@ class PortScanner:
 
         results = {}
         for i in range(0, len(tasks)):
-            results.update({i : tasks[i].result()})
-        return json.dumps(results)
+            if tasks[i].result() != "closed":
+                results.update({(i+1) : str(tasks[i].result())})
+        return results
 
 
 
