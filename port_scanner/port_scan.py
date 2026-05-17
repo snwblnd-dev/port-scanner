@@ -1,6 +1,8 @@
 import asyncio
 import socket
+import json
 
+from pydantic import BaseModel
 
 
 class PortScanner:
@@ -29,12 +31,6 @@ class PortScanner:
                     writer.close()
                     await writer.wait_closed()
                     return "open"
-            except asyncio.TimeoutError as e:
-                return "closed"
-            except OSError as e:
-                return "closed"
-            except ConnectionRefusedError as e:
-                return "closed"
             except Exception as e:
                 return "closed"
 
@@ -48,10 +44,18 @@ class PortScanner:
                 port_status = tg.create_task(self.connect_socket(i))
                 tasks.append(port_status)
 
+        # for i in range(0, len(tasks)):
+        #     if tasks[i].result() != "closed":
+        #         print(f'port {str(i + 1)} is {tasks[i].result()}')
 
+        results = {}
         for i in range(0, len(tasks)):
             if tasks[i].result() != "closed":
-                print(f'port {str(i - 1)} is {tasks[i].result()}')
+                results.update({(i+1) : str(tasks[i].result())})
+        return results
+
+
+
 
 
 
