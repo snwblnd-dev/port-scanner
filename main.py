@@ -1,19 +1,35 @@
-import asyncio
-from concurrent.futures import ThreadPoolExecutor
+from api.routers import scans
 
-from port_scan import PortScanner
-
-
-def main():
-
-    scanner = PortScanner('scanme.nmap.org', 1024)
-    # futures = [executor.submit(scanner.scan_ports(scanner.port_range))]
-    # executor.map(scanner.scan_ports, scanner.port_range)
-    asyncio.run(scanner.scan_ports())
+from fastapi import FastAPI
 
 
+app = FastAPI()
+app.include_router(scans.router)
 
-if __name__ == '__main__':
-    main()
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+#def main():
+    #the original cmd line scanner test
+    # parser = create_parser()
+    # args = parser.parse_args()
+    # scanner = PortScanner(hostname=args.url, max_port=args.port, semaphore=args.semaphore)
+
+
+
+
+
+
+
+    # scanner = PortScanner(hostname='scanme.nmap.org', max_port=1024, semaphore=500)
+    # try:
+    #     asyncio.run(scanner.scan_ports())
+    # except KeyboardInterrupt as e:
+    #     print(e)
+
+
+
+# if __name__ == '__main__':
+#     main()
 
 
